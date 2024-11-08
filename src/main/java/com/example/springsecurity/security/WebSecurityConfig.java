@@ -1,5 +1,6 @@
 package com.example.springsecurity.security;
 
+import com.example.springsecurity.refreshtoken.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
 
@@ -36,7 +38,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtProvider);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtProvider, refreshTokenService);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }

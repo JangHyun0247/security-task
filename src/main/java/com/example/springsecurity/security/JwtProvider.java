@@ -1,5 +1,7 @@
 package com.example.springsecurity.security;
 
+import com.example.springsecurity.refreshtoken.repository.RefreshTokenRepository;
+import com.example.springsecurity.refreshtoken.service.RefreshTokenService;
 import com.example.springsecurity.user.util.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -27,6 +29,10 @@ public class JwtProvider {
     public static final String AUTHORIZATION_KEY = "auth";
 
     public static final Long ACCESS_TOKEN_TIME = 1000L * 60 * 60; // 1시간
+    public static final Long REFRESH_TOKEN_TIME = 14 * 24 * 60 * 60 * 1000L; // 2주
+
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${jwt-secret-key}")
     private String secretKey;
@@ -54,6 +60,21 @@ public class JwtProvider {
     }
 
     /**
+     * Refresh 토큰 생성
+     */
+    public String createRefreshToken(String username, UserRole role) {
+        Date date = new Date();
+
+        return BEARER_PREFIX + Jwts.builder()
+                .setSubject(username)
+                .claim(AUTHORIZATION_KEY, role)
+                .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
+                .setIssuedAt(date) // 발급일
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
      * 요청 바디에서 액세스 토큰 추출
      */
     public String getAccessTokenFromHeader(HttpServletRequest request) {
@@ -64,6 +85,18 @@ public class JwtProvider {
         } else {
             return bearerToken;
         }
+    }
+
+    /**
+     * 요청 헤더에서 리프레시 토큰 추출
+     */
+    public String getRefreshTokenFromHeader(HttpServletRequest request) {
+        String refreshToken = request.getHeader("Refresh-Token"); // 예시로 "Refresh-Token" 헤더에서 리프레시 토큰을 추출
+
+        if (StringUtils.hasText(refreshToken)) {
+            return refreshToken;
+        }
+        return null;  // 리프레시 토큰이 없으면 null 반환
     }
 
     /**
@@ -83,6 +116,13 @@ public class JwtProvider {
             log.error("잘못된 JWT 토큰 입니다.");
         }
         return false;
+    }
+
+    /**
+     * Refresh 토큰 검증
+     */
+    public boolean hasRefreshToken(String username) {
+        return refreshTokenRepository.findByUsername(username).isPresent();
     }
 
     /**

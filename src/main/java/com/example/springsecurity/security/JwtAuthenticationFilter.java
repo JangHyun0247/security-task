@@ -1,5 +1,6 @@
 package com.example.springsecurity.security;
 
+import com.example.springsecurity.refreshtoken.service.RefreshTokenService;
 import com.example.springsecurity.user.dto.SignupRequestDto;
 import com.example.springsecurity.user.util.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,15 +15,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+import static com.example.springsecurity.security.JwtProvider.AUTHORIZATION_HEADER;
 import static com.example.springsecurity.security.JwtProvider.BEARER_PREFIX;
 
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
-    public JwtAuthenticationFilter(JwtProvider jwtProvider) {
+    public JwtAuthenticationFilter(JwtProvider jwtProvider, RefreshTokenService refreshTokenService) {
         this.jwtProvider = jwtProvider;
+        this.refreshTokenService = refreshTokenService;
         setFilterProcessesUrl("/sign");
     }
 
@@ -54,6 +58,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserRole role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUserRole();
 
         String accessToken = jwtProvider.createAccessToken(username, role).substring(BEARER_PREFIX.length());
+        String refreshToken = jwtProvider.createRefreshToken(username, role);
+
+        res.setHeader(AUTHORIZATION_HEADER,accessToken);
+
+        refreshTokenService.save(username, refreshToken);
 
         // JSON 응답에 토큰 포함
         res.setStatus(HttpServletResponse.SC_OK);

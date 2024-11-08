@@ -1,5 +1,6 @@
 package com.example.springsecurity.security;
 
+import com.example.springsecurity.user.util.UserRole;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.springsecurity.security.JwtProvider.AUTHORIZATION_HEADER;
+
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
@@ -37,16 +40,23 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String accessToken = jwtProvider.getAccessTokenFromHeader(req);
+        String username = jwtProvider.getUsernameFromToken(accessToken);
 
-        if (StringUtils.hasText(accessToken) && jwtProvider.validateAccessToken(accessToken)) {
-            log.info("액세스 토큰 검증 성공");
-            String username = jwtProvider.getUsernameFromToken(accessToken);
-            setAuthentication(username);
+        if (StringUtils.hasText(accessToken)) {
+            if (jwtProvider.validateAccessToken(accessToken)) {
+                log.info("액세스 토큰 검증 성공");
+                updateToken(accessToken, username, res);
+            } else if (jwtProvider.hasRefreshToken(username)) {
+                String refreshToken = jwtProvider.getRefreshTokenFromHeader(req);
+                updateToken(refreshToken, username, res);
+                log.info("토큰 Refresh 성공");
+            } else {
+                jwtExceptionHandler(res, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+                return;
+            }
         } else {
-            jwtExceptionHandler(res, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
-            return;
+            log.error("토큰 없음");
         }
-
         filterChain.doFilter(req, res);
     }
 
@@ -73,5 +83,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    private void updateToken(String token, String username, HttpServletResponse res) throws IOException {
+        UserRole role = jwtProvider.getRoleFromToken(token);
+        String newAccessToken = jwtProvider.createAccessToken(username, role);
+
+        res.setHeader(AUTHORIZATION_HEADER, newAccessToken);
+        setAuthentication(jwtProvider.getUsernameFromToken(newAccessToken));
+
+        res.setContentType("application/json");
+        res.getWriter().write("{\"status\": " + HttpStatus.OK.value() + ", \"message\": \"토큰 갱신 성공\", \"newAccessToken\": \"" + newAccessToken + "\"}");
     }
 }
