@@ -1,7 +1,7 @@
-package com.example.springsecurity.refreshtoken.service;
+package com.example.springsecurity.user.refreshtoken.service;
 
-import com.example.springsecurity.refreshtoken.entity.RefreshToken;
-import com.example.springsecurity.refreshtoken.repository.RefreshTokenRepository;
+import com.example.springsecurity.user.refreshtoken.entity.RefreshToken;
+import com.example.springsecurity.user.refreshtoken.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

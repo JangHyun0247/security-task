@@ -1,4 +1,4 @@
-package com.example.springsecurity.refreshtoken.entity;
+package com.example.springsecurity.user.refreshtoken.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

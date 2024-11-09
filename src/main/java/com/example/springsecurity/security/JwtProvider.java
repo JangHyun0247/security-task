@@ -1,7 +1,7 @@
 package com.example.springsecurity.security;
 
-import com.example.springsecurity.refreshtoken.repository.RefreshTokenRepository;
-import com.example.springsecurity.refreshtoken.service.RefreshTokenService;
+import com.example.springsecurity.user.refreshtoken.repository.RefreshTokenRepository;
+import com.example.springsecurity.user.refreshtoken.service.RefreshTokenService;
 import com.example.springsecurity.user.util.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

@@ -1,6 +1,6 @@
-package com.example.springsecurity.refreshtoken.repository;
+package com.example.springsecurity.user.refreshtoken.repository;
 
-import com.example.springsecurity.refreshtoken.entity.RefreshToken;
+import com.example.springsecurity.user.refreshtoken.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

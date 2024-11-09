@@ -1,6 +1,6 @@
 package com.example.springsecurity.security;
 
-import com.example.springsecurity.refreshtoken.service.RefreshTokenService;
+import com.example.springsecurity.user.refreshtoken.service.RefreshTokenService;
 import com.example.springsecurity.user.dto.SignupRequestDto;
 import com.example.springsecurity.user.util.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
