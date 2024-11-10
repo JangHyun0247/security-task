@@ -51,7 +51,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // CSRF 설정
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers("/signup")  // /signup에 대해서 CSRF 보호 비활성화
+                .ignoringRequestMatchers("/signup","/sign")
         );
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
@@ -60,7 +60,7 @@ public class WebSecurityConfig {
         );
 
         http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-                .requestMatchers("/signup", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/signup", "/sign","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
         );
 
